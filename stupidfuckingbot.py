@@ -4,26 +4,34 @@ import os
 import discord
 import configparser
 import random
+from discord.ext import commands
 
 config = configparser.ConfigParser()
 config.read('settings.ini')
-client = discord.Client()
+client = commands.Bot(command_prefix = 'l.')
+frogdir = "animals/frog"
 
 @client.event
 async def on_ready():
     print(f'Logged in as\n{client.user.name}\n{client.user.id}\n------')
 
+@client.command()
+async def ping(ctx):
+    await ctx.send(f'Ping: {round(client.latency * 1000)} ms')
 
-frogdir = "animals/frog"
+@client.command()
+async def frog(ctx):
+    frogl = os.listdir(frogdir)
+    frogp = discord.File(os.path.join(frogdir, random.choice(frogl)))
+    print(os.path.join(frogdir, random.choice(frogl)))
+    await ctx.send(file=frogp)
+
 @client.event
 async def on_message(message):
     if message.author != client.user:
-        if "FROG" in message.content.upper():
-            frogs = os.listdir(frogdir)
-            frog = discord.File(os.path.join(frogdir, random.choice(frogs)))
-            await message.channel.send(file=frog)
-        elif "BERD" in message.content.upper():
-            berd = discord.File("animals/berd.png")
-            await message.channel.send(file=berd)
+        if "BERD" in message.content.upper():
+            berdp = discord.File("animals/berd.png")
+            await message.channel.send(file=berdp)
+    await client.process_commands(message)
 
 client.run(config['Bot']['Token'])
